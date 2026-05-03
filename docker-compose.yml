@@ -10,6 +10,12 @@ services:
       RABBITMQ_DEFAULT_PASS: guest
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - time-tracking-network
 
 volumes:
   rabbitmq_data:
+
+networks:
+  time-tracking-network:
+    name: time-tracking-network
