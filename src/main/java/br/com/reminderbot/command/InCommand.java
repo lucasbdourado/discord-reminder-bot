@@ -2,7 +2,8 @@ package br.com.reminderbot.command;
 
 import br.com.reminderbot.model.Author;
 import br.com.reminderbot.model.RegisterType;
-import br.com.reminderbot.producer.MarkingRegisterEvent;
+import br.com.reminderbot.producer.MarkingRegisterProducer;
+import br.com.reminderbot.producer.TimeMarkRegisteredEvent;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import net.dv8tion.jda.api.entities.User;
@@ -12,6 +13,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class InCommand implements DiscordCommand
 {
+	private final MarkingRegisterProducer markingRegisterProducer;
+
+	public InCommand(MarkingRegisterProducer markingRegisterProducer)
+	{
+		this.markingRegisterProducer = markingRegisterProducer;
+	}
+
 	@Override
 	public String name()
 	{
@@ -21,35 +29,42 @@ public class InCommand implements DiscordCommand
 	@Override
 	public void execute(MessageReceivedEvent event)
 	{
+		String content = event.getMessage().getContentRaw().trim().toLowerCase(Locale.ROOT);
+
+		RegisterType registerType = resolveRegisterType(content);
+
+		if (registerType == null)
+		{
+			event.getChannel()
+				.sendMessage("Comando inválido. Use `in`, `in h`, `in home` ou `in (home)`.").queue();
+
+			return;
+		}
+
 		User user = event.getAuthor();
 
 		String channelId = event.getChannel().getId();
 
-		String content = event.getMessage().getContentRaw().trim().toLowerCase(Locale.ROOT);
-
 		Author author = new Author(user.getIdLong(), user.getName(), user.getGlobalName());
 
+		TimeMarkRegisteredEvent timeMarkRegisteredEvent = new TimeMarkRegisteredEvent(author, channelId,
+			registerType, LocalDateTime.now());
+
+		markingRegisterProducer.send(timeMarkRegisteredEvent);
+	}
+
+	private RegisterType resolveRegisterType(String content)
+	{
 		if (content.equals("in"))
 		{
-			event.getChannel().sendMessage("Entrada registrada").queue();
-
-			MarkingRegisterEvent markingRegisterEvent = new MarkingRegisterEvent(author, channelId,
-				RegisterType.IN, LocalDateTime.now());
-
-			return;
+			return RegisterType.IN;
 		}
 
 		if (content.equals("in h") || content.equals("in home") || content.equals("in (home)"))
 		{
-			event.getChannel().sendMessage("Entrada home office registrada").queue();
-
-			MarkingRegisterEvent markingRegisterEvent = new MarkingRegisterEvent(author, channelId,
-				RegisterType.IN_HOME, LocalDateTime.now());
-
-			return;
+			return RegisterType.IN_HOME;
 		}
 
-		event.getChannel().sendMessage("Comando inválido. Use `in`, `in h`, `in home` ou `in (home)`.")
-			.queue();
+		return null;
 	}
 }
