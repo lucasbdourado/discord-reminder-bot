@@ -34,7 +34,7 @@ public class OutCommand implements DiscordCommand
 
 		Author author = new Author(user.getIdLong(), user.getName(), user.getGlobalName());
 
-		TimeMarkRegisteredEvent timeMarkRegisteredEvent = new TimeMarkRegisteredEvent(author, channelId,
+		TimeMarkRegisteredEvent timeMarkRegisteredEvent = new TimeMarkRegisteredEvent(author,
 			RegisterType.OUT, LocalDateTime.now());
 
 		markingRegisterProducer.send(timeMarkRegisteredEvent);

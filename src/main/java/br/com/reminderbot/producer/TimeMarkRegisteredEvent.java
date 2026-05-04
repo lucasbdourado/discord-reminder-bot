@@ -4,7 +4,6 @@ import br.com.reminderbot.model.Author;
 import br.com.reminderbot.model.RegisterType;
 import java.time.LocalDateTime;
 
-public record TimeMarkRegisteredEvent(Author author, String channelId, RegisterType type,
-                                      LocalDateTime registeredAt)
+public record TimeMarkRegisteredEvent(Author author, RegisterType type, LocalDateTime registeredAt)
 {
 }
