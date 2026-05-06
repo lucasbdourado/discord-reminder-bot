@@ -1,10 +1,13 @@
 package br.com.reminderbot.application.workday.dto;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
 public class WorkDayResponse
 {
+	private LocalDate date;
+
 	private List<LocalTime> times;
 
 	private long workedMinutes;
@@ -16,6 +19,16 @@ public class WorkDayResponse
 	private String status;
 
 	private boolean invalid;
+
+	public LocalDate getDate()
+	{
+		return date;
+	}
+
+	public void setDate(LocalDate date)
+	{
+		this.date = date;
+	}
 
 	public List<LocalTime> getTimes()
 	{

@@ -5,6 +5,7 @@ import br.com.reminderbot.model.Author;
 import br.com.reminderbot.model.RegisterType;
 import br.com.reminderbot.producer.MarkingRegisterProducer;
 import br.com.reminderbot.producer.TimeMarkRegisteredEvent;
+import br.com.reminderbot.service.DiscordPrivateMessageService;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Locale;
@@ -17,9 +18,13 @@ public class InCommand implements DiscordCommand
 {
 	private final MarkingRegisterProducer markingRegisterProducer;
 
-	public InCommand(MarkingRegisterProducer markingRegisterProducer)
+	private final DiscordPrivateMessageService discordPrivateMessageService;
+
+	public InCommand(MarkingRegisterProducer markingRegisterProducer,
+		DiscordPrivateMessageService discordPrivateMessageService)
 	{
 		this.markingRegisterProducer = markingRegisterProducer;
+		this.discordPrivateMessageService = discordPrivateMessageService;
 	}
 
 	@Override
@@ -37,16 +42,13 @@ public class InCommand implements DiscordCommand
 
 		if (registerType == null)
 		{
-			event.getChannel()
-				.sendMessage("Comando inválido. Use `in`, `in h`, `in home` ou `in (home)`.").queue();
+			discordPrivateMessageService.sendMessage(event.getAuthor(),
+				"Comando inv\u00e1lido. Use `in`, `in h`, `in home` ou `in (home)`.");
 
 			return;
 		}
 
 		User user = event.getAuthor();
-
-		String channelId = event.getChannel().getId();
-
 		Author author = new Author(user.getIdLong(), user.getName(), user.getGlobalName());
 
 		TimeMarkRegisteredEvent timeMarkRegisteredEvent = new TimeMarkRegisteredEvent(author,
@@ -61,7 +63,7 @@ public class InCommand implements DiscordCommand
 			return;
 		}
 
-		event.getChannel().sendMessage("Horário de saída: " + exitTime).queue();
+		discordPrivateMessageService.sendWorkDaySummary(user, workDayResponse);
 	}
 
 	private RegisterType resolveRegisterType(String content)
