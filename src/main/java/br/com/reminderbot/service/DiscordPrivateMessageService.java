@@ -47,7 +47,6 @@ public class DiscordPrivateMessageService
 
 		user.openPrivateChannel()
 			.flatMap(channel -> channel.sendMessageEmbeds(buildWorkDaySummaryEmbed(response)))
-			.setActionRow(Button.primary(WORKDAY_REMINDER_ENABLE_COMPONENT_ID, "Habilitar lembrete"))
 			.queue(null,
 				error -> LOGGER.warn("Could not send work day summary to user {}", user.getId(), error));
 	}
