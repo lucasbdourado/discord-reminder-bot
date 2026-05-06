@@ -4,10 +4,15 @@ import static br.com.reminderbot.configuration.RabbitMQConstants.MARKING_REGISTE
 import static br.com.reminderbot.configuration.RabbitMQConstants.MARKING_REGISTER_QUEUE;
 import static br.com.reminderbot.configuration.RabbitMQConstants.MARKING_REGISTER_ROUTING_KEY;
 
+import br.com.reminderbot.application.workday.dto.WorkDayResponse;
+import java.util.Map;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.DefaultClassMapper;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +43,25 @@ public class RabbitMQConfig
 	@Bean
 	public JacksonJsonMessageConverter jsonMessageConverter()
 	{
-		return new JacksonJsonMessageConverter();
+		DefaultClassMapper classMapper = new DefaultClassMapper();
+		classMapper.setIdClassMapping(Map.of(
+			"br.com.lucasbdourado.electronictimemarking.application.dto.WorkDayResponse",
+			WorkDayResponse.class
+		));
+
+		JacksonJsonMessageConverter converter = new JacksonJsonMessageConverter();
+		converter.setClassMapper(classMapper);
+		return converter;
+	}
+
+	@Bean
+	public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
+		JacksonJsonMessageConverter jsonMessageConverter)
+	{
+		RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+		rabbitTemplate.setMessageConverter(jsonMessageConverter);
+		rabbitTemplate.setReplyTimeout(10000);
+
+		return rabbitTemplate;
 	}
 }
