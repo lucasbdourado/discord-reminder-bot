@@ -1,13 +1,13 @@
 package br.com.reminderbot.service;
 
-import static br.com.reminderbot.listener.DiscordButtonListener.WORKDAY_REMINDER_ENABLE_COMPONENT_ID;
-
 import br.com.reminderbot.application.workday.dto.WorkDayResponse;
+import br.com.reminderbot.listener.DiscordButtonListener;
 import java.awt.Color;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
@@ -46,7 +46,10 @@ public class DiscordPrivateMessageService
 		}
 
 		user.openPrivateChannel()
-			.flatMap(channel -> channel.sendMessageEmbeds(buildWorkDaySummaryEmbed(response)))
+			.flatMap(channel -> channel.sendMessageEmbeds(buildWorkDaySummaryEmbed(response))
+				.addComponents(
+					ActionRow.of(Button.primary(buildWorkDayReminderEnableComponentId(response),
+						"Habilitar lembrete"))))
 			.queue(null,
 				error -> LOGGER.warn("Could not send work day summary to user {}", user.getId(), error));
 	}
@@ -54,7 +57,7 @@ public class DiscordPrivateMessageService
 	public MessageEmbed buildWorkDaySummaryEmbed(WorkDayResponse response)
 	{
 		EmbedBuilder embed = new EmbedBuilder();
-		embed.setTitle("Resumo do ponto");
+		embed.setTitle("Resumo do ponto - " + formatDate(response));
 		embed.setColor(Color.GREEN);
 		embed.addField("**Data**", formatDate(response), false);
 		embed.addField("**Marcações**", formatMarkings(response), false);
@@ -134,5 +137,11 @@ public class DiscordPrivateMessageService
 		}
 
 		return response.getDate().format(DATE_FORMATTER);
+	}
+
+	private String buildWorkDayReminderEnableComponentId(WorkDayResponse response)
+	{
+		LocalTime exitTime = response == null ? null : response.getExitTime();
+		return DiscordButtonListener.buildWorkDayReminderEnableComponentId(exitTime);
 	}
 }

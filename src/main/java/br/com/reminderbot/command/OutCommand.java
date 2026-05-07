@@ -8,6 +8,7 @@ import br.com.reminderbot.producer.TimeMarkRegisteredEvent;
 import br.com.reminderbot.service.DiscordPrivateMessageService;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Locale;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.springframework.stereotype.Component;
@@ -35,6 +36,16 @@ public class OutCommand implements DiscordCommand
 	@Override
 	public void execute(MessageReceivedEvent event)
 	{
+		String content = event.getMessage().getContentRaw().trim().toLowerCase(Locale.ROOT);
+
+		if (!content.equals("out"))
+		{
+			discordPrivateMessageService.sendMessage(event.getAuthor(),
+				"Comando inv\u00e1lido. Use `out`.");
+
+			return;
+		}
+
 		User user = event.getAuthor();
 
 		Author author = new Author(user.getIdLong(), user.getName(), user.getGlobalName());

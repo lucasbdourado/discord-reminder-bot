@@ -3,6 +3,7 @@ package br.com.reminderbot.configuration;
 import static br.com.reminderbot.configuration.RabbitMQConstants.MARKING_REGISTER_EXCHANGE;
 import static br.com.reminderbot.configuration.RabbitMQConstants.MARKING_REGISTER_QUEUE;
 import static br.com.reminderbot.configuration.RabbitMQConstants.MARKING_REGISTER_ROUTING_KEY;
+import static br.com.reminderbot.configuration.RabbitMQConstants.REMINDER_EVENTS_EXCHANGE;
 
 import br.com.reminderbot.application.workday.dto.WorkDayResponse;
 import java.util.Map;
@@ -10,10 +11,12 @@ import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.DefaultClassMapper;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,6 +27,12 @@ public class RabbitMQConfig
 	public DirectExchange markingRegisterExchange()
 	{
 		return new DirectExchange(MARKING_REGISTER_EXCHANGE);
+	}
+
+	@Bean
+	public TopicExchange reminderEventsExchange()
+	{
+		return new TopicExchange(REMINDER_EVENTS_EXCHANGE);
 	}
 
 	@Bean
@@ -56,11 +65,12 @@ public class RabbitMQConfig
 
 	@Bean
 	public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
-		JacksonJsonMessageConverter jsonMessageConverter)
+		JacksonJsonMessageConverter jsonMessageConverter,
+		@Value("${app.rabbitmq.marking-register.reply-timeout:30000}") long replyTimeout)
 	{
 		RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
 		rabbitTemplate.setMessageConverter(jsonMessageConverter);
-		rabbitTemplate.setReplyTimeout(10000);
+		rabbitTemplate.setReplyTimeout(replyTimeout);
 
 		return rabbitTemplate;
 	}
