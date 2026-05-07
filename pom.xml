@@ -10,7 +10,7 @@
     </parent>
     <groupId>br.com</groupId>
     <artifactId>reminderbot</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0</version>
     <name>reminderbot</name>
     <description>reminderbot</description>
     <url/>
