@@ -4,8 +4,11 @@ import static br.com.reminderbot.configuration.RabbitMQConstants.MARKING_REGISTE
 import static br.com.reminderbot.configuration.RabbitMQConstants.MARKING_REGISTER_QUEUE;
 import static br.com.reminderbot.configuration.RabbitMQConstants.MARKING_REGISTER_ROUTING_KEY;
 import static br.com.reminderbot.configuration.RabbitMQConstants.REMINDER_EVENTS_EXCHANGE;
+import static br.com.reminderbot.configuration.RabbitMQConstants.WORKDAY_REMINDER_NOTIFICATION_QUEUE;
+import static br.com.reminderbot.configuration.RabbitMQConstants.WORKDAY_REMINDER_NOTIFICATION_ROUTING_KEY;
 
 import br.com.reminderbot.application.workday.dto.WorkDayResponse;
+import br.com.reminderbot.consumer.WorkDayReminderNotificationEvent;
 import java.util.Map;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -50,12 +53,28 @@ public class RabbitMQConfig
 	}
 
 	@Bean
+	public Queue workDayReminderNotificationQueue()
+	{
+		return new Queue(WORKDAY_REMINDER_NOTIFICATION_QUEUE, true);
+	}
+
+	@Bean
+	public Binding workDayReminderNotificationBinding(Queue workDayReminderNotificationQueue,
+		TopicExchange reminderEventsExchange)
+	{
+		return BindingBuilder.bind(workDayReminderNotificationQueue).to(reminderEventsExchange)
+			.with(WORKDAY_REMINDER_NOTIFICATION_ROUTING_KEY);
+	}
+
+	@Bean
 	public JacksonJsonMessageConverter jsonMessageConverter()
 	{
 		DefaultClassMapper classMapper = new DefaultClassMapper();
 		classMapper.setIdClassMapping(Map.of(
 			"br.com.lucasbdourado.electronictimemarking.application.dto.WorkDayResponse",
-			WorkDayResponse.class
+			WorkDayResponse.class,
+			"br.com.lucasbdourado.electronictimemarking.infrastructure.messaging.producer.WorkDayReminderNotificationEvent",
+			WorkDayReminderNotificationEvent.class
 		));
 
 		JacksonJsonMessageConverter converter = new JacksonJsonMessageConverter();

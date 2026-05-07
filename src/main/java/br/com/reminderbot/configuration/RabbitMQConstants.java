@@ -13,6 +13,12 @@ public final class RabbitMQConstants
 	public static final String WORKDAY_REMINDER_PREFERENCE_CHANGED_ROUTING_KEY =
 		"workday.reminder.preference.changed";
 
+	public static final String WORKDAY_REMINDER_NOTIFICATION_QUEUE =
+		"workday.reminder.notification.queue";
+
+	public static final String WORKDAY_REMINDER_NOTIFICATION_ROUTING_KEY =
+		"workday.reminder.notification";
+
 	private RabbitMQConstants()
 	{
 	}
