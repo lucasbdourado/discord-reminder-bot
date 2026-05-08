@@ -17,7 +17,7 @@ public class MarkingRegisterProducer
 		this.rabbitTemplate = rabbitTemplate;
 	}
 
-	public WorkDayResponse send(TimeMarkRegisteredEvent event)
+	public WorkDayResponse send(RegisterTimeMarkCommand event)
 	{
 		Object response = rabbitTemplate.convertSendAndReceive(MARKING_REGISTER_EXCHANGE,
 			MARKING_REGISTER_ROUTING_KEY, event);

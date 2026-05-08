@@ -1,10 +1,9 @@
 package br.com.reminderbot.command;
 
 import br.com.reminderbot.application.workday.dto.WorkDayResponse;
-import br.com.reminderbot.model.Author;
 import br.com.reminderbot.model.RegisterType;
 import br.com.reminderbot.producer.MarkingRegisterProducer;
-import br.com.reminderbot.producer.TimeMarkRegisteredEvent;
+import br.com.reminderbot.producer.RegisterTimeMarkCommand;
 import br.com.reminderbot.service.DiscordPrivateMessageService;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -49,12 +48,11 @@ public class InCommand implements DiscordCommand
 		}
 
 		User user = event.getAuthor();
-		Author author = new Author(user.getIdLong(), user.getName(), user.getGlobalName());
 
-		TimeMarkRegisteredEvent timeMarkRegisteredEvent = new TimeMarkRegisteredEvent(author,
-			registerType, LocalDateTime.now());
+		RegisterTimeMarkCommand registerTimeMarkCommand = new RegisterTimeMarkCommand(user.getIdLong(),
+			user.getName(), user.getGlobalName(), registerType, LocalDateTime.now());
 
-		WorkDayResponse workDayResponse = markingRegisterProducer.send(timeMarkRegisteredEvent);
+		WorkDayResponse workDayResponse = markingRegisterProducer.send(registerTimeMarkCommand);
 
 		LocalTime exitTime = workDayResponse.getExitTime();
 
